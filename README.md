@@ -88,5 +88,5 @@ GitHub repository:
 
 Development instructions will be added as the project grows.
 
-
+The project is managed by Git and Github 
 
