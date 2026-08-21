@@ -292,3 +292,212 @@ I also learned why an in-memory Python dictionary is insufficient when the polle
 ### Day 3 Status
 
 Complete — continuous warehouse polling and shared inventory storage have been implemented and verified.
+
+## Day 4 — Asynchronous Check-In & Frontend
+
+### Day 4 Objective
+
+The Day 4 requirement introduced a deliberate architectural pivot.
+
+Instead of continuing to focus on the warehouse polling workflow, the project was extended toward an asynchronous event-driven check-in system. RabbitMQ became the central message queue for handling print requests asynchronously.
+
+The goal was to connect the Flask check-in API, persistent check-in state, RabbitMQ, a background consumer, and a print webhook into one working workflow.
+
+### Starting Point
+
+Before making changes, I inspected the existing repository structure and verified that the working tree was clean.
+
+The existing project contained:
+
+- Flask application
+- RabbitMQ producer and consumer
+- SQLite stock store
+- Warehouse API and poller
+- Existing learning documentation
+- Frontend/API components
+
+Git verification showed that the repository was up to date with the remote branch and had no uncommitted changes.
+
+### Architecture Pivot
+
+The original Day 3 architecture was:
+
+```text
+Warehouse API
+      ↓
+Continuous Poller
+      ↓
+SQLite Stock Store
+      ↓
+Query Endpoint
+
+For Day 4, the focus shifted to an asynchronous check-in workflow:
+
+Frontend
+    ↓
+Flask /check-in
+    ↓
+SQLite Check-In State
+    ↓
+RabbitMQ print_requests
+    ↓
+Badge Consumer
+    ↓
+/print-webhook
+    ↓
+SQLite → PRINTED
+
+RabbitMQ remained at the center of the architecture because the print operation does not need to block the initial check-in request.
+
+### What I Changed
+
+I extended the existing Flask application to support attendee check-ins.
+
+The check-in workflow stores the attendee state in SQLite and initially marks a successful check-in as:PENDING
+
+A print request is then published to RabbitMQ for asynchronous processing.
+
+The RabbitMQ producer was reused and adapted for the print-request workflow, while the consumer was extended to process the print request and communicate with the print webhook.
+
+### Asynchronous Processing
+
+The consumer receives the print request from RabbitMQ and processes it independently from the original check-in request.
+
+### The workflow is:
+Check-in received
+        ↓
+Record stored as PENDING
+        ↓
+Print request published
+        ↓
+RabbitMQ queue
+        ↓
+Consumer receives message
+        ↓
+Print webhook called
+        ↓
+Successful processing
+        ↓
+Record updated to PRINTED
+        ↓
+RabbitMQ message acknowledged
+
+This demonstrated the difference between a synchronous request and an asynchronous message-driven workflow.
+
+### Duplicate Check-In Discovery
+
+I verified that duplicate attendee IDs are rejected.
+
+This prevents the same attendee from being registered repeatedly and ensures that an existing check-in is not accidentally processed as a new event.
+
+### Print State Discovery
+
+A new check-in initially remains in the PENDING state while the print request is waiting to be processed.
+
+After the consumer successfully processes the print request and the webhook succeeds, the record changes to:PRINTED
+
+This provides a persistent representation of the progress of the asynchronous operation.
+
+### RabbitMQ Acknowledgement Behavior
+
+The consumer was designed to acknowledge the RabbitMQ message only after successful processing.
+
+This means that a message is not considered successfully completed simply because the consumer received it.
+
+### The processing sequence is:
+
+Receive message
+      ↓
+Process print request
+      ↓
+Call print webhook
+      ↓
+Successful result
+      ↓
+Update database
+      ↓
+Acknowledge RabbitMQ message
+
+This helped demonstrate why acknowledgement timing matters in asynchronous systems.
+
+### Completed Print Jobs
+
+I also verified the behavior of an already-completed print job.
+
+If a print request has already been completed, the system returns:409
+
+The message is acknowledged rather than repeatedly processed.
+
+This prevents an already-completed print job from being retried indefinitely.
+
+### Frontend Integration
+
+A frontend was added to provide a user-facing check-in flow.
+
+Flask serves the frontend through its configured static directory, allowing the frontend and backend API to operate as part of the same application.
+
+The frontend sends the check-in request to the Flask API, while the asynchronous print workflow continues through RabbitMQ and the consumer.
+
+### Verification
+
+The complete workflow was tested successfully:
+
+Frontend
+    ↓
+Flask /check-in
+    ↓
+SQLite
+    ↓
+RabbitMQ
+    ↓
+Consumer
+    ↓
+Print webhook
+    ↓
+SQLite PRINTED state
+
+### The verification confirmed that:
+
+A valid attendee can check in.
+The check-in is persisted in SQLite.
+A new check-in starts in the PENDING state.
+A print request is published to RabbitMQ.
+The consumer receives the message asynchronously.
+The consumer calls the print webhook.
+Successful processing changes the record to PRINTED.
+The RabbitMQ message is acknowledged after successful processing.
+Duplicate attendee IDs are rejected.
+Completed print jobs are not repeatedly processed.
+The frontend can communicate with the Flask API.
+The complete asynchronous workflow operates successfully.
+
+### What I Learned
+
+Day 4 showed me that RabbitMQ is not just another component added to an application. It changes how the application handles work.
+
+The check-in request can complete without waiting for the physical printing process to finish. RabbitMQ acts as the boundary between the immediate API operation and the background print operation.
+
+I also learned that persistent state is important in an asynchronous workflow. The PENDING and PRINTED states allow the system to track progress even though different processes are responsible for different parts of the workflow.
+
+The consumer's acknowledgement behavior also demonstrated an important reliability principle: a message should only be acknowledged after the work it represents has successfully completed.
+
+### Day 4 Final Status
+
+Complete — the Meridian check-in workflow has been extended into an asynchronous RabbitMQ-based system with a Flask frontend, SQLite state persistence, a print producer, a background consumer, and a print webhook.
+
+### The verified Day 4 architecture is:
+Frontend
+    ↓
+Flask Check-In API
+    ↓
+SQLite — PENDING
+    ↓
+RabbitMQ print_requests
+    ↓
+Print Consumer
+    ↓
+Print Webhook
+    ↓
+SQLite — PRINTED
+
+RabbitMQ is now the central asynchronous message path connecting the check-in system to the background printing workflow.
