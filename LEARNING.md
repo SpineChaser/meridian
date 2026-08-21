@@ -130,3 +130,29 @@ I also learned how to troubleshoot a RabbitMQ connection, identify an existing q
 ### Final Status
 
 Complete — the Day 1–2 mini-prototype is functional.
+
+## Day 3 — Original Specification
+
+### Requirement
+
+Individuals form and build toward the original specification:
+
+- Poll a warehouse API every 5 minutes.
+- Cache the latest stock information.
+- Expose a query endpoint that allows clients to retrieve stock information.
+
+### Initial Understanding
+
+The Day 1–2 prototype established the RabbitMQ producer → queue → consumer workflow.
+
+For Day 3, I need to extend the prototype toward the original inventory-sync specification. The main focus is understanding how to retrieve warehouse stock periodically, store the latest stock in a cache, and make that cached information available through an API endpoint.
+
+### Planned Flow
+
+Warehouse API → Poller → Stock Cache → Query Endpoint
+
+RabbitMQ will remain part of the architecture where it provides value for the asynchronous inventory workflow.
+
+### Day 3 Status
+
+Started — requirement understood; implementation not yet complete.
