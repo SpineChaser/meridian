@@ -268,3 +268,27 @@ A polling loop allows the inventory system to keep the shared stock store synchr
 The five-minute interval is represented as a configurable constant rather than being hard-coded into the polling logic.
 
 The next step is to verify that the Flask query endpoint can continuously read the latest inventory while the poller updates the shared SQLite store.
+
+## Day 3 — Final Status
+
+### Completion
+
+Day 3 is complete.
+
+The warehouse polling workflow was extended from a one-time poll into a continuous polling process. The poller retrieves warehouse stock every five minutes and stores the latest inventory in the shared SQLite stock store.
+
+The implementation was verified using a temporary two-second polling interval. Two consecutive polls successfully retrieved the warehouse stock and updated the SQLite store.
+
+The project now has the following verified flow:
+
+Warehouse API → Continuous Poller → SQLite Stock Store → Query Endpoint
+
+### What I learned
+
+Day 3 taught me that an inventory synchronization service needs more than a working API call. The system must continuously retrieve changing warehouse data, store it somewhere that can be shared between processes, and expose the latest stored data to clients.
+
+I also learned why an in-memory Python dictionary is insufficient when the poller and Flask API run as separate processes. SQLite provides a shared persistence layer between them.
+
+### Day 3 Status
+
+Complete — continuous warehouse polling and shared inventory storage have been implemented and verified.
