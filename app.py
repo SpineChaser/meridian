@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime
 import uuid
 
@@ -11,13 +11,13 @@ from checkin_store import (
 )
 from print_producer import publish_print_request
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="frontend", static_url_path="")
 
 initialize_database()
 
 @app.route('/')
 def home():
-    return "Meridian is running!"
+    return send_from_directory('frontend', 'index.html')
 
 @app.route('/check-in', methods=['POST'])
 def check_in():

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meridian Check-In</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <section class="card">
+            <h1>MERIDIAN</h1>
+            <p class="subtitle">Event Check-In System</p>
+
+            <form id="checkin-form">
+                <label for="attendee-id">Attendee ID</label>
+
+                <input
+                    type="text"
+                    id="attendee-id"
+                    placeholder="e.g. ATT-TEST-006"
+                    required
+                >
+
+                <button type="submit" id="checkin-button">
+                    CHECK IN
+                </button>
+            </form>
+
+            <div id="result" class="result hidden">
+                <p id="message"></p>
+                <p id="status"></p>
+                <p id="job-id"></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
