@@ -230,3 +230,23 @@ This showed me that the current cache implementation works for demonstrating the
 ### Next Step
 
 The next milestone is to keep the poller running continuously and introduce the five-minute polling interval. After that, the query endpoint will read from the cache while the poller continues updating it.
+
+### Query Endpoint Discovery
+
+I added a GET /inventory/stock endpoint that reads from the shared SQLite stock store.
+
+Initially, the endpoint returned an empty object because the poller and Flask application were using separate in-memory Python processes.
+
+This exposed an important limitation of the original in-memory cache: each Python process has its own copy of the cache.
+
+### Architecture Decision
+
+I replaced the in-memory cache as the shared storage layer with SQLite.
+
+The resulting architecture is:
+
+Warehouse API → Poller → SQLite Stock Store → Query Endpoint
+
+The poller writes the latest warehouse inventory to SQLite, while the Flask API reads the latest stored inventory from the same database.
+
+I verified the design by running the poller and then reading the inventory from a separate Python process. The Flask query endpoint also returned the stored warehouse inventory successfully.
