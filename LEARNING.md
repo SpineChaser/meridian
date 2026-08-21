@@ -193,3 +193,40 @@ A local mock API allows me to develop and test the inventory synchronization wor
 
 The next step is to build a poller that retrieves this data and updates the stock cache.
 
+### Dependency Discovery
+
+While building the warehouse poller, I discovered that the Python environment did not have the requests package installed.
+
+I verified this with the command:
+
+python -m pip show requests
+
+The package was not found, so I installed it and verified version 2.34.2.
+
+I then added requests==2.34.2 to requirements.txt so the dependency is reproducible for the project.
+
+### What I learned
+
+A working local environment is not enough. Dependencies used by the application must also be recorded in requirements.txt so another developer can recreate the environment.
+
+### Milestone 2 — Warehouse Poller
+
+I created a poller that retrieves stock from the mock warehouse API using the requests library.
+
+The poller successfully retrieved the warehouse stock and passed it to the stock cache.
+
+Test result:
+
+Updated stock cache: {'KEYBOARD-003': 30, 'LAPTOP-001': 12, 'MOUSE-002': 50, 'PHONE-004': 25, 'TABLET-005': 8}
+
+### Cache Behavior Discovery
+
+The current stock cache is an in-memory Python dictionary.
+
+When the poller process exits, the cached data is lost. Starting another Python process creates a new empty cache.
+
+This showed me that the current cache implementation works for demonstrating the data flow, but it is not yet suitable for a continuously running inventory service.
+
+### Next Step
+
+The next milestone is to keep the poller running continuously and introduce the five-minute polling interval. After that, the query endpoint will read from the cache while the poller continues updating it.
