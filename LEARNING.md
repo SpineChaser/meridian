@@ -250,3 +250,21 @@ Warehouse API → Poller → SQLite Stock Store → Query Endpoint
 The poller writes the latest warehouse inventory to SQLite, while the Flask API reads the latest stored inventory from the same database.
 
 I verified the design by running the poller and then reading the inventory from a separate Python process. The Flask query endpoint also returned the stored warehouse inventory successfully.
+
+### Milestone 3 — Continuous Warehouse Polling
+
+I updated the warehouse poller to run continuously instead of executing only once.
+
+The poller now runs `poll_warehouse()` and waits 300 seconds before performing the next poll.
+
+I verified that `POLL_INTERVAL` is set to 300 seconds and tested the repeated polling behavior using a temporary two-second interval.
+
+The poller successfully retrieved the warehouse stock twice and updated the shared SQLite stock store each time.
+
+### What I learned
+
+A polling loop allows the inventory system to keep the shared stock store synchronized with the warehouse API over time.
+
+The five-minute interval is represented as a configurable constant rather than being hard-coded into the polling logic.
+
+The next step is to verify that the Flask query endpoint can continuously read the latest inventory while the poller updates the shared SQLite store.

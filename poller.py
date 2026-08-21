@@ -1,9 +1,12 @@
+import time
+
 import requests
 
 from stock_store import initialize_database, update_stock
 
 
 WAREHOUSE_API_URL = "http://localhost:5001/warehouse/stock"
+POLL_INTERVAL = 300
 
 
 def poll_warehouse():
@@ -19,4 +22,7 @@ def poll_warehouse():
 
 
 if __name__ == "__main__":
-    poll_warehouse()
+    while True:
+        poll_warehouse()
+        print(f"Waiting {POLL_INTERVAL} seconds before the next poll...")
+        time.sleep(POLL_INTERVAL)
