@@ -156,3 +156,16 @@ RabbitMQ will remain part of the architecture where it provides value for the as
 ### Day 3 Status
 
 Started — requirement understood; implementation not yet complete.
+
+### Implementation Decision
+
+The existing Flask application and RabbitMQ prototype will be extended rather than replaced.
+
+For development, I will use a local mock warehouse API to simulate the external warehouse service. This allows me to build and test the polling and caching workflow without depending on an external service.
+
+The first implementation milestone is:
+
+Warehouse API → Poller → Stock Cache
+
+The five-minute scheduling and query endpoint will be added after the basic polling and caching flow is verified.
+
