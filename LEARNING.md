@@ -169,3 +169,27 @@ Warehouse API → Poller → Stock Cache
 
 The five-minute scheduling and query endpoint will be added after the basic polling and caching flow is verified.
 
+### Milestone 1 — Mock Warehouse API
+
+I created a local Flask service to simulate the external warehouse API.
+
+The service exposes:
+
+GET /warehouse/stock
+
+The endpoint successfully returned the current warehouse stock as JSON.
+
+Example result:
+
+- LAPTOP-001: 12
+- MOUSE-002: 50
+- KEYBOARD-003: 30
+- PHONE-004: 25
+- TABLET-005: 8
+
+### What I learned
+
+A local mock API allows me to develop and test the inventory synchronization workflow without depending on an external warehouse service.
+
+The next step is to build a poller that retrieves this data and updates the stock cache.
+
